@@ -1,6 +1,7 @@
 # Note -- It is better to have specified exact files to ignore rather than using wildcards such as '**' or '*'.
 
 # ENV Files
+.env
 
 # Database Files
 AI_MERCH_STORE_database_data
