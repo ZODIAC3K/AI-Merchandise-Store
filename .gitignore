@@ -2,7 +2,7 @@
 
 # Node.js (server-side) related files
 server/node_modules
-server/.env
+server/config/.env
 server/logs
 server/tmp
 server/*.log
@@ -12,7 +12,7 @@ server/dist
 
 # React app (client-side) related files
 client/node_modules
-client/.env
+client/config/.env
 client/.cache
 client/build
 
