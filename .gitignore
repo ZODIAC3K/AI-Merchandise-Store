@@ -1,0 +1,24 @@
+# Note -- It is better to have specified exact files to ignore rather than using wildcards such as '**' or '*'.
+
+# Node.js (server-side) related files
+server/node_modules
+server/.env
+server/logs
+server/tmp
+server/*.log
+
+# Build outputs
+server/dist
+
+# React app (client-side) related files
+client/node_modules
+client/.env
+client/.cache
+client/build
+
+
+# Common files to ignore
+.DS_Store
+Thumbs.db
+npm-debug.log
+yarn-error.log
