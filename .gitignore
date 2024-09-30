@@ -1,11 +1,13 @@
 # Note -- It is better to have specified exact files to ignore rather than using wildcards such as '**' or '*'.
 
+# ENV Files
+.env
+
 # Database Files
 AI_MERCH_STORE_database_data
 
 # Node.js (server-side) related files
 server/node_modules
-config/.env
 server/logs
 server/tmp
 server/*.log
@@ -15,7 +17,6 @@ server/dist
 
 # React app (client-side) related files
 client/node_modules
-config/.env
 client/.cache
 client/build
 
