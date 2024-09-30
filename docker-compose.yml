@@ -1,0 +1,88 @@
+# This is for development environment
+# docker compose up will start the client and server services and mount the local directories to the containers for hot-reloading and development purposes but the actual app is not present in the container thats why we have a separate docker-compose.prod.yml file for production environment.
+
+services:
+    web:
+        depends_on:
+            - api
+
+        build: ./client
+
+        volumes:
+            - ./client:/app
+            - node_modules_cached_client:/app/node_modules
+
+        ports:
+            - ${CLIENT_PORT}:${CLIENT_PORT}
+
+        environment:
+            VITE_API_URL: http://localhost:${SERVER_PORT}
+
+        develop:
+            watch:
+                - path: ./client/package.json
+                  action: rebuild
+                - path: ./client/package-lock.json
+                  action: rebuild
+
+                - path: ./client
+                  target: /app
+                  action: sync
+
+    api:
+        depends_on:
+            - db
+
+        build: ./server
+
+        volumes:
+            - ./server:/app
+            - node_modules_cached_server:/app/node_modules
+
+        ports:
+            - "${SERVER_PORT}:${SERVER_PORT}"
+
+        environment:
+            SERVER_NODE_ENV: ${SERVER_NODE_ENV}
+            SERVER_PORT: ${SERVER_PORT}
+
+        develop:
+            watch:
+                - path: ./server/package.json
+                  action: rebuild
+                - path: ./server/package-lock.json
+                  action: rebuild
+
+                - path: ./server
+                  target: /app
+                  action: sync
+
+    db:
+        image: postgres:16-alpine
+        restart: always
+        environment:
+            POSTGRES_USER: ${DB_USER}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_DB: ${DB_NAME}
+            POSTGRES_PORT: ${DB_PORT}
+        ports:
+            - ${DB_PORT}:${DB_PORT}
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+            interval: 1s
+            timeout: 5s
+            retries: 10
+
+        volumes:
+            - ./AI_MERCH_STORE_database_data:/var/lib/postgresql/data
+
+    adminer:
+        image: adminer
+        restart: always
+        ports:
+            - ${ADMINER_PORT}:${ADMINER_PORT}
+
+volumes:
+    node_modules_cached_client:
+    node_modules_cached_server:
+    AI_MERCH_STORE_database_data:

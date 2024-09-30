@@ -1,0 +1,21 @@
+services:
+    server:
+        build: ./server
+        ports:
+            - "${PORT}:${PORT}"
+        environment:
+            - NODE_ENV=${NODE_ENV}
+            - DB_HOST=${DB_HOST}
+            - DB_USER=${DB_USER}
+            - DB_PASS=${DB_PASS}
+        volumes:
+            - ./server:/app
+            - /app/node_modules
+        command: pnpm run dev
+
+    client:
+        build: ./client
+        ports:
+            - "3000:3000"
+        environment:
+            - NODE_ENV=${NODE_ENV}
