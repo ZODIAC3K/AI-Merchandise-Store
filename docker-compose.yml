@@ -1,88 +1,97 @@
-# This is for development environment
-# docker compose up will start the client and server services and mount the local directories to the containers for hot-reloading and development purposes but the actual app is not present in the container thats why we have a separate docker-compose.prod.yml file for production environment.
+# This is the development environment configuration
+# Running `docker-compose up` will start the client, server, and database services.
+# The local directories are mounted into the containers for hot-reloading and development purposes.
+# Note that the actual application code is not present in the containers themselves.
+# A separate `docker-compose.prod.yml` file is used for the production environment.
 
 services:
-    web:
-        depends_on:
-            - api
+    # Client (Web) Service
+    # web:
+    #     depends_on:
+    #         - api # Ensure the API service is up before the client
 
-        build: ./client
+    #     build: ./client # Build the client application from the ./client directory
 
-        volumes:
-            - ./client:/app
-            - node_modules_cached_client:/app/node_modules
+    #     volumes:
+    #         - ./client:/app # Mount the client directory for hot-reloading
+    #         - node_modules_cached_client:/app/node_modules # Cache node_modules for faster rebuilds
 
-        ports:
-            - ${CLIENT_PORT}:${CLIENT_PORT}
+    #     ports:
+    #         - ${CLIENT_PORT}:${CLIENT_PORT} # Map client port from .env
 
-        environment:
-            VITE_API_URL: http://localhost:${SERVER_PORT}
+    #     environment:
+    #         VITE_API_URL: http://localhost:${SERVER_PORT} # Set the API URL for the client
 
-        develop:
-            watch:
-                - path: ./client/package.json
-                  action: rebuild
-                - path: ./client/package-lock.json
-                  action: rebuild
+    #     develop:
+    #         watch:
+    #             - path: ./client/package.json # Rebuild on package.json changes
+    #               action: rebuild
+    #             - path: ./client/package-lock.json # Rebuild on package-lock.json changes
+    #               action: rebuild
+    #             - path: ./client # Sync client files for live reloading
+    #               target: /app
+    #               action: sync
 
-                - path: ./client
-                  target: /app
-                  action: sync
-
+    # API (Server) Service
     api:
         depends_on:
-            - db
+            - db # Ensure the database is up before the server
 
-        build: ./server
+        build: ./server # Build the server application from the ./server directory
 
         volumes:
-            - ./server:/app
-            - node_modules_cached_server:/app/node_modules
-
+            - ./server:/app # Mount the server directory for hot-reloading
+            - node_modules_cached_server:/app/node_modules # Cache node_modules for faster rebuilds
         ports:
-            - "${SERVER_PORT}:${SERVER_PORT}"
+            - "${SERVER_PORT}:${SERVER_PORT}" # Map server port from .env
 
         environment:
-            SERVER_NODE_ENV: ${SERVER_NODE_ENV}
-            SERVER_PORT: ${SERVER_PORT}
+            SERVER_NODE_ENV: ${SERVER_NODE_ENV} # Set Node.js environment (development/production)
+            SERVER_PORT: ${SERVER_PORT} # Set server port from .env
 
         develop:
             watch:
-                - path: ./server/package.json
+                - path: ./server/package.json # Rebuild on package.json changes
                   action: rebuild
-                - path: ./server/package-lock.json
+                - path: ./server/package-lock.json # Rebuild on package-lock.json changes
                   action: rebuild
-
-                - path: ./server
+                - path: ./server # Sync server files for live reloading
                   target: /app
                   action: sync
 
+    # Database Service (PostgreSQL)
     db:
-        image: postgres:16-alpine
-        restart: always
+        image: postgres:16-alpine # Use a lightweight Postgres image
+        restart: always # Restart the service if it fails
         environment:
-            POSTGRES_USER: ${DB_USER}
-            POSTGRES_PASSWORD: ${DB_PASSWORD}
-            POSTGRES_DB: ${DB_NAME}
-            POSTGRES_PORT: ${DB_PORT}
+            POSTGRES_USER: ${DB_USER} # Set PostgreSQL user from .env
+            POSTGRES_PASSWORD: ${DB_PASSWORD} # Set PostgreSQL password from .env
+            POSTGRES_DB: ${DB_NAME} # Set PostgreSQL database from .env
+            POSTGRES_PORT: 5432 # Set PostgreSQL port from .env
         ports:
-            - ${DB_PORT}:${DB_PORT}
+            - ${DB_PORT}:5432 # Map database port from .env
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
-            interval: 1s
-            timeout: 5s
-            retries: 10
+            test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"] # Check database readiness
+            interval: 1s # Run health check every second
+            timeout: 5s # Timeout after 5 seconds
+            retries: 10 # Retry 10 times before failing
 
         volumes:
-            - ./AI_MERCH_STORE_database_data:/var/lib/postgresql/data
+            - ./AI_MERCH_STORE_database_data:/var/lib/postgresql/data # Persist database data on host
 
-    adminer:
-        image: adminer
-        restart: always
+    # PgAdmin Service
+    pgadmin:
+        image: dpage/pgadmin4
+        container_name: pgadmin
+        depends_on:
+            - db
+        environment:
+            PGADMIN_DEFAULT_EMAIL: admin@admin.com
+            PGADMIN_DEFAULT_PASSWORD: password
         ports:
-            - ${ADMINER_PORT}:${ADMINER_PORT}
+            - ${DB_GUI_PORT}:80
 
 volumes:
-    node_modules_cached_client:
-    node_modules_cached_server:
-    AI_MERCH_STORE_database_data:
+    node_modules_cached_client: # Cache node_modules for the client
+    node_modules_cached_server: # Cache node_modules for the server
+    AI_MERCH_STORE_database_data: # Persist database data on host
